@@ -1,14 +1,12 @@
 import random
 from datetime import datetime
 
-from browser.createbrowser import CreatBrowser
+from browser.createbrowser_theard import CreatBrowser
 from save_result import SaveResult
 from save_result_tovar import SaveResultTovar
 from src.plu_parse import PluParser
 from src.source_parse import SourceParse
-from src._no_source_parse_plu import SourceParsePlu
 
-from src.temp import *
 
 from time import perf_counter
 
@@ -18,17 +16,17 @@ from src.tovar_parser import TovarParser
 
 def main():
 
-    collec_count_page = 0
+    collec_count_page = 3
 
-    browser_core = CreatBrowser()
+    browser_core = CreatBrowser('collection', True)
 
 
 
     print(f'Парсер запущен. Получаю данные')
 
-    # data_good = SourceParse(browser_core.driver, collec_count_page).start_pars()
+    data_good = SourceParse(browser_core.driver, collec_count_page).start_pars()
     from src.temp_source_collect import list_col
-    data_good = list_col[:2]
+    # data_good = list_col[:2]
 
 
     print(f'Собрал {len(data_good)} коллекций на обработку')
@@ -61,33 +59,25 @@ def save_plu_tovar():
 
     print()
 
-def save_plu_tovar_one_theard():
-    collec_count_page = 0
-
-    name_brows = f'Profile' + str(random.randint(1, 4))
-    browser_core = CreatBrowser(name_brows)
-
-    from src.tovar_parser_one_theard import TovarParserOneTheard
-    tavar_data = TovarParserOneTheard(browser_core.driver, BotDB).start_pars()
-    # from src.temp_good_tovar import good_list
-    # tavar_data = good_list
-
-    file_name = f'{datetime.now().strftime("%H_%M_%S")}'
-
-    SaveResultTovar(tavar_data).save_file(file_name)
-
-    print()
 
 
 
 if __name__ == '__main__':
-    # main()
     start_job = perf_counter()
-    print(f'Начинаю парсинг товаров {datetime.now().strftime("%H_%M_%S")}')
-    # save_plu_tovar()
-    save_plu_tovar_one_theard()
+    print(f'Начинаю парсинг коллекций {datetime.now().strftime("%H_%M_%S")}')
+    main()
     over_job = perf_counter() - start_job
     over_job = over_job / 60
-    print(f'Закончил парсинг товаров {datetime.now().strftime("%H_%M_%S")} завтратив времени: {over_job} минут')
+    print(f'Закончил парсинг коллекций {datetime.now().strftime("%H_%M_%S")} завтратив времени: {over_job} минут')
+
+
+
+
+    # start_job = perf_counter()
+    # print(f'Начинаю парсинг товаров {datetime.now().strftime("%H_%M_%S")}')
+    # save_plu_tovar_one_theard()
+    # over_job = perf_counter() - start_job
+    # over_job = over_job / 60
+    # print(f'Закончил парсинг товаров {datetime.now().strftime("%H_%M_%S")} завтратив времени: {over_job} минут')
 
     print(f'Работу закончил')

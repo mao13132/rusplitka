@@ -62,7 +62,8 @@ class CreatBrowser:
         s = Service(executable_path=r"chromedriver.exe")
         try:
             self.driver = webdriver.Chrome(service=s, options=options)
-        except:
+        except Exception as es:
+            print(f'fОшибка при создании браузера "{es}"')
             return False
 
         # try:

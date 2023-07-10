@@ -10,7 +10,7 @@ from datetime import datetime
 class SourceParse:
     def __init__(self, driver, count_page):
         self.driver = driver
-        self.source_name = 'profiplitka'
+        self.source_name = 'rusplitka'
         self.links_post = []
         self.count_page = count_page
 
@@ -25,7 +25,7 @@ class SourceParse:
     def __check_load_page(self):
         try:
             WebDriverWait(self.driver, 5).until(
-                EC.presence_of_element_located((By.XPATH, "//*[@id='collections']")))
+                EC.presence_of_element_located((By.XPATH, "//*[@class='pagination']")))
             return True
         except:
             return False
@@ -60,8 +60,9 @@ class SourceParse:
     def get_all_post(self):
         try:
             rows_post = self.driver.find_elements(by=By.XPATH,
-                                                  value=f"//*[@class='favorites__grid']"
-                                                        f"//*[contains(@class, 'compilation__item')]")
+                                                  value=f"//*[@id='container_elements_catalog']"
+                                                        f"//*[@itemscope='product']")
+
 
 
         except Exception as es:
@@ -73,8 +74,8 @@ class SourceParse:
     def click_paginator(self):
         try:
             next_paginator = self.driver.find_elements(by=By.XPATH,
-                                                       value=f"//*[contains(@class, 'page-n')]"
-                                                             f"//a[contains(@class, 'active')]/following-sibling::a")
+                                                       value=f"//*[contains(@class, 'pagination')]"
+                                                             f"//*[contains(@class, 'active')]/following-sibling::a")
 
 
         except Exception as es:
@@ -94,7 +95,7 @@ class SourceParse:
 
     def get_link(self, row):
         try:
-            link_post = row.find_element(by=By.XPATH, value=f".//a[contains(@class, 'compilation__pic')]") \
+            link_post = row.find_element(by=By.XPATH, value=f".//a[contains(@class, 'name')]") \
                 .get_attribute('href')
         except:
             link_post = ''
@@ -111,79 +112,49 @@ class SourceParse:
 
     def get_color(self, row):
         try:
-            name_post = row.find_elements(by=By.XPATH, value=f".//a[contains(@class, 'name')]//parent::div//img")
+            color_ = row.find_elements(by=By.XPATH, value=f".//*[contains(@class, 'colors')]"
+                                                          f"//span[contains(@class, 'colors')]")
         except:
             return ''
 
-        color_list = [x.get_attribute('title') for x in name_post]
+        color_list = [x.get_attribute('title') for x in color_]
 
         return color_list
 
     def get_coutry(self, row):
         try:
-            coutry = row.find_element(by=By.XPATH, value=f".//span[contains(text(), 'Страна')]//parent::div").text
+            coutry = row.find_element(by=By.XPATH, value=f".//*[contains(@class, 'country')]"
+                                                         f"//*[contains(@class, 'country-img')]").text
         except:
             return ''
-
-        try:
-            coutry = coutry.replace('Страна: ', '')
-        except:
-            coutry = coutry
 
         return coutry
 
     def get_size(self, row):
         try:
-            size = row.find_element(by=By.XPATH, value=f".//span[contains(text(), 'Размер')]//parent::div").text
+            size = row.find_elements(by=By.XPATH, value=f".//*[contains(@class, 'size')]/span")
         except:
-            return ''
+            return []
 
         try:
-            size = size.replace('Размер: ', '')
-            size = size.replace(' см', '').strip()
-            size = size.replace(',', '')
+            size_list = [x.text for x in size]
         except:
-            size = size
+            size_list = []
 
-        try:
-            size = size.split()
-        except:
-            size = size
-
-        return size
-
-    def get_type(self, row):
-        try:
-            type = row.find_element(by=By.XPATH, value=f".//span[contains(text(), 'Тип')]//parent::div").text
-        except:
-            return ''
-
-        try:
-            type = type.replace('Тип: ', '')
-        except:
-            type = type
-
-        try:
-            type = type.split(', ')
-        except:
-            type = type
-
-        return type
+        return size_list
 
     def get_price(self, row):
         try:
-            price = row.find_element(by=By.XPATH, value=f".//span[contains(@class, 'price_real')]").text
+            price = row.find_element(by=By.XPATH, value=f".//*[contains(@class, 'price')]").text
         except:
             return ''
 
         try:
-            price = price.replace(' руб./м2', '')
+            price = price.split()[1]
         except:
             price = price
 
         return price
-
-
 
     def itter_rows_post(self, rows_post):
 
@@ -193,7 +164,6 @@ class SourceParse:
             color = self.get_color(row)
             coutry = self.get_coutry(row)
             size = self.get_size(row)
-            type_ = self.get_type(row)
             price = self.get_price(row)
 
             good_itter = {}
@@ -203,10 +173,16 @@ class SourceParse:
             good_itter['color'] = color
             good_itter['coutry'] = coutry
             good_itter['size'] = size
-            good_itter['type'] = type_
             good_itter['price'] = price
 
             self.links_post.append(good_itter)
+
+            count_good = len(self.links_post)
+
+            if count_good % 5 == 0 and count_good != 0:
+                print(f'Обработал {count_good} коллекций')
+
+        print(f'Всего обработал {len(self.links_post)} коллекций')
 
         return True
 
@@ -240,18 +216,14 @@ class SourceParse:
             # return True
 
     def start_pars(self):
-        from src.temp_collect import temp_collect
 
-        for url in temp_collect:
+        self.url = 'https://www.rusplitka.ru/catalog/'
 
-            self.url = url
-            result_start_page = self.loop_load_page()
+        result_start_page = self.loop_load_page()
 
-            if not result_start_page:
-                continue
+        if not result_start_page:
+            return False
 
-            response_one_step = self.step_one_parse()
-
-
+        response_one_step = self.step_one_parse()
 
         return self.links_post
