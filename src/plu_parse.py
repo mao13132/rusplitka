@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -23,6 +24,8 @@ class PluParser:
 
             self.driver.get(url)
             return True
+        except TimeoutException:
+            return False
         except Exception as es:
             print(f'Ошибка при заходе на "{url}" "{es}"')
             return False
@@ -43,6 +46,8 @@ class PluParser:
     def loop_load_page(self, post):
         coun = 0
         coun_ower = 10
+
+        self.driver.set_page_load_timeout(15)
 
         while True:
             coun += 1
@@ -73,26 +78,6 @@ class PluParser:
             theme = ''
 
         return theme
-
-    def get_proizvoditel(self):
-        try:
-            proizvoditel = self.driver.find_element(by=By.XPATH, value=f"//*[contains(@class, 'infos-prop')]").text
-
-        except:
-            return ''
-
-
-        return proizvoditel
-
-    def get_opisanie(self):
-        try:
-            opisanie = self.driver.find_element(by=By.XPATH, value=f"//*[@itemprop='description']").text
-
-        except:
-            return ''
-
-
-        return opisanie
 
     def _get_image_gallery_list(self):
         try:
@@ -139,47 +124,35 @@ class PluParser:
     def get_photo(self):
         try:
             photo_rows = self.driver.find_elements(by=By.XPATH,
-                                             value=f"(//*[contains(@class, 'draggable')])[1]//a[contains(@class, 'link')]")
+                                                   value=f"(//*[contains(@class, 'product')])"
+                                                         f"//*[contains(@class, 'slider__node')]//picture/img")
         except Exception as es:
             print(f'Ошибка при получении фото "{es}"')
             return []
 
         try:
-            photo_list = [x.get_attribute('href') for x in photo_rows]
+            photo_list = [x.get_attribute('src') for x in photo_rows]
         except Exception as es:
             print(f'Ошибка при формирования ссылок на фото "{es}"')
             return []
 
         return photo_list
 
-    def formated_name_article_category(self, value: str):
-
-        name = value.replace('\n', ' ')
-        value = value.replace('\n', '')
+    def get_full_name(self):
         try:
-
-            _temp_name = value.split()
-
+            full_name = self.driver.find_element(by=By.XPATH, value=f"//h1").text
         except Exception as es:
-            print(f'Ошибка в formated_name_article_category "{es}"')
-            return '', ''
+            print(f'Ошибка при получении get_full_name "{es}"')
+            return ''
 
-        if len(_temp_name) == 1:
-            _temp_name = _temp_name[0].split()
+        return full_name
 
-        artikle = _temp_name[-1]
 
-        # for count, word in enumerate(_temp_name):
-        #
-        #     if '/' in word or '.' in word:
-        #         artikle = word
-        #         # name = value.replace(artikle, '').strip()
-
-        return name, artikle
 
     def all_list_xarakt(self):
         try:
-            xarakt_list = self.driver.find_elements(by=By.XPATH, value=f"//div[@itemprop='description']/ul/li")
+            xarakt_list = self.driver.find_elements(by=By.XPATH, value=f"//*[contains(@class, 'detail-navigates')]"
+                                                                       f"//dl[contains(@class, 'characteristic')]")
 
         except Exception as es:
             print(f'Ошибка при получении all_list_xarakt "{es}"')
@@ -229,6 +202,20 @@ class PluParser:
 
         return good_list
 
+    def format_har(self, gar_list):
+        har_dict = {}
+        for har in gar_list:
+            try:
+                har_row = har.text.split('\n')
+            except:
+                continue
+            try:
+                har_dict[har_row[0]] = ';'.join(x for x in har_row[1:])
+            except:
+                continue
+
+        return har_dict
+
     def get_xarakt_list(self):
 
         all_list = self.all_list_xarakt()
@@ -236,7 +223,7 @@ class PluParser:
             return []
 
         # good_dict = self.itter_xarakter(all_list)
-        good_dict = [x.text for x in all_list]
+        good_dict = self.format_har(all_list)
 
         return good_dict
 
@@ -269,7 +256,6 @@ class PluParser:
 
         except Exception as es:
             print(f'Ошибка состав "{es}"')
-
 
         return sostav_list
 
@@ -374,13 +360,14 @@ class PluParser:
 
             post['xarakt'] = self.get_xarakt_list()
 
-            post['proizvoditel'] = self.get_proizvoditel()
-            post['opisanie'] = self.get_opisanie()
-
-
             image_list = self.get_photo()
 
             post['image'] = image_list
+
+            full_name = self.get_full_name()
+
+            post['full_name'] = full_name
+
 
 
             ################сбор товара из коллекции############
@@ -388,14 +375,12 @@ class PluParser:
 
             print(f'Собрал в коллекции {post["name"]} {len(post["plu_data"])}шт товаров')
 
-
-
             if count % 5 == 0 and count != 0:
                 print(f'Обработал {count} колллекций')
 
             good_over_count += 1
 
-        print(f'Итог: собрал информацию с {len(self.links_post)} коллекций')
+        print(f'Итог: обработал информацию с {len(self.links_post)} коллекций')
 
         # result_dict = {}
         # result_dict['name_colums'] = self.all_xarakt

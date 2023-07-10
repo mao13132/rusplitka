@@ -34,7 +34,7 @@ class TovarParserOneTheard:
 
         try:
             WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.XPATH, f'//*[contains(text(), "{name_post[:-3]}")]')))
+                EC.presence_of_element_located((By.XPATH, f'//*[contains(text(), "тзывы")]')))
             return True
         except Exception as es:
             print(f'Ошибка при загрузке "{name_post}" поста "{es}"')
@@ -64,94 +64,10 @@ class TovarParserOneTheard:
 
             return True
 
-    def get_name_xarakter(self, xar):
-        try:
-            name_xar = xar.find_element(by=By.XPATH, value=f".//span[contains(@class, 'label')]").text
-        except Exception as es:
-            print(f'Ошибка при получении get_name_xarakter "{es}"')
-
-            return ''
-        try:
-            name_xar = name_xar.replace(':', '')
-        except:
-            pass
-
-        return name_xar
-
-    def get_value_name_xarakter2(self, xar):
-        try:
-            _xar = xar.find_elements(by=By.XPATH, value=f".//td")
-        except Exception as es:
-            print(f'Ошибка при получении get_value_name_xarakter2 "{es}"')
-
-            return '', ''
-        try:
-            name_xar = _xar[0].text.replace(':', '')
-        except:
-            name_xar = ''
-        try:
-            value_xar = _xar[1].text.strip()
-        except:
-            value_xar = ''
-
-        return name_xar, value_xar
-
-    def get_value_xarakter(self, xar):
-        try:
-            list_xar = xar.find_element(by=By.XPATH, value=f".//*[contains(@class, 'prop')]").text
-        except Exception as es:
-            print(f'Ошибка при получении get_value_xarakter "{es}"')
-
-            return False
-
-        return list_xar
-
-    def itter_xarakter(self, all_list):
-
-        good_list = {}
-
-        for xar in all_list:
-            # dict_one_xar = {}
-            name_xar = self.get_name_xarakter(xar)
-            value_xar = self.get_value_xarakter(xar)
-
-            good_list[name_xar] = value_xar
-
-            val_black_list = ['Производитель', 'Коллекция', 'Артикул', 'Размер', 'Страна', 'Тип']
-
-            if name_xar not in self.all_xarakt and name_xar not in val_black_list:
-                self.all_xarakt.append(name_xar)
-
-        return good_list
-
-    def itter_xarakter2(self, all_list, list_har):
-
-        good_list = {}
-
-        for xar in all_list:
-            # dict_one_xar = {}
-            name_xar, value_xar = self.get_value_name_xarakter2(xar)
-            # value_xar = self.get_value_xarakter2(xar)
-
-            if name_xar == '' and value_xar == '':
-                continue
-
-            if name_xar == 'Назначение':
-                value_xar = ';'.join(x.replace('-', '').strip() for x in value_xar.split('\n'))
-
-            list_har[name_xar] = value_xar
-            # good_list[name_xar] = value_xar
-
-            if name_xar not in self.all_xarakt:
-                self.all_xarakt.append(name_xar)
-
-        return good_list
-
     def all_list_xarakt(self):
         try:
-            xarakt_list = self.driver.find_elements(by=By.XPATH, value=f"//div[contains(@class, 'cart__infos')]"
-                                                                       f"//*[contains(@class, 'cart__infos-col')]"
-                                                                       f"//*[contains(@class, 'infos-line')]")
+            xarakt_list = self.driver.find_elements(by=By.XPATH, value=f"//*[contains(@class, 'detail-navigates')]"
+                                                                       f"//dl[contains(@class, 'characteristic')]")
 
         except Exception as es:
             print(f'Ошибка при получении all_list_xarakt "{es}"')
@@ -160,16 +76,28 @@ class TovarParserOneTheard:
 
         return xarakt_list
 
-    def all_list_xarakt2(self):
-        try:
-            xarakt_list = self.driver.find_elements(by=By.XPATH, value=f"//div[@id='charCharacters']//tr")
+    def format_har(self, gar_list):
+        har_dict = {}
+        for har in gar_list:
+            try:
+                har_row = har.text.split('\n')
+            except:
+                continue
 
-        except Exception as es:
-            print(f'Ошибка при получении all_list_xarakt "{es}"')
+            name_har = har_row[0]
 
-            return []
+            val_black_list = ['Производитель', 'Коллекция', 'Артикул', 'Размер', 'Страна', 'Тип', 'Помещение',
+                              'Назначение']
 
-        return xarakt_list
+            if name_har not in self.all_xarakt and name_har not in val_black_list:
+                self.all_xarakt.append(name_har)
+
+            try:
+                har_dict[name_har] = ';'.join(x for x in har_row[1:])
+            except:
+                continue
+
+        return har_dict
 
     def get_xarakt_list(self):
 
@@ -177,7 +105,7 @@ class TovarParserOneTheard:
         if all_list == []:
             return []
 
-        good_dict = self.itter_xarakter(all_list)
+        good_dict = self.format_har(all_list)
 
         return good_dict
 
@@ -195,62 +123,41 @@ class TovarParserOneTheard:
 
         good_dict = self.itter_xarakter2(all_list, list_har)
 
-
         return good_dict
-
-    def get_text(self):
-
-        try:
-            text = self.driver.find_element(by=By.XPATH, value=f"//*[contains(@itemprop, 'description')]").text
-        except Exception as es:
-            print(f'Ошибка при получении get_text "{es}"')
-
-            return ''
-
-        try:
-            text = '\n'.join(x for x in text.split('\n')[:-1])
-        except:
-            text = text
-
-        return text
 
     def get_price(self):
         try:
-            text_post = self.driver.find_element(by=By.XPATH, value=f"//*[contains(@class, 'cart__down')]"
-                                                                    f"//*[contains(@class, 'price-real')]").text
-
+            price_post = self.driver.find_element(by=By.XPATH, value=f"//*[contains(@class, 'offer__price')]").text
 
         except:
             return 0
 
         try:
-            int(text_post)
+            price = price_post.split()[0]
         except Exception as es:
 
             print(f'Ошибка при get_price "{es}"')
 
             return 0
 
-        return text_post
+        return price
 
     def get_edinicha(self):
         try:
-            text_post = self.driver.find_element(by=By.XPATH, value=f"//*[contains(@class, 'cart__down')]"
-                                                                    f"//*[contains(@class, 'cart__price cart__price_pc')]").text
-
+            edinic_ = self.driver.find_element(by=By.XPATH, value=f"//*[contains(@class, 'offer__price')]").text
 
         except:
-            return 'шт'
+            return 'м2'
 
         try:
-            ed = text_post.split('/')[-1]
+            edinic = edinic_.split('/')[-1]
         except Exception as es:
 
-            print(f'Ошибка при get_price "{es}"')
+            print(f'Ошибка при get_edinicha "{es}"')
 
-            return 'шт'
+            return 'м2'
 
-        return ed
+        return edinic
 
     def _get_image_in_row(self, row):
         try:
@@ -262,20 +169,18 @@ class TovarParserOneTheard:
 
         return link_image
 
-    def itter_get_image(self, rows_list):
-        good_list_photo = []
+    def get_name_full(self):
+        try:
+            name_post = self.driver.find_element(by=By.XPATH, value=f"//h1").text
+        except:
+            name_post = ''
 
-        for row in rows_list:
-            get_image = self._get_image_in_row(row)
-            if get_image:
-                good_list_photo.append(get_image)
-
-        return good_list_photo
+        return name_post
 
     def get_one_image(self):
         try:
             _image = self.driver.find_element(by=By.XPATH, value=f"//*[@class='cart__images']"
-                                                                 f"//*[contains(@class, 'slick-active')]")\
+                                                                 f"//*[contains(@class, 'slick-active')]") \
                 .get_attribute('href')
         except Exception as es:
             print(f'Ошибка при получении галерии get_one_image "{es}"')
@@ -286,14 +191,20 @@ class TovarParserOneTheard:
 
     def _get_image_gallery_list(self):
         try:
-            image_gallery_list = self.driver.find_elements(by=By.XPATH, value=f"//*[@class='cart__images']"
-                                                                              f"//picture")
+            photo_rows = self.driver.find_elements(by=By.XPATH,
+                                                   value=f"(//*[contains(@class, 'product')])"
+                                                         f"//*[contains(@class, 'slider__node')]//picture/img")
         except Exception as es:
-            print(f'Ошибка при получении галерии PLU "{es}"')
-
+            print(f'Ошибка при получении фото "{es}"')
             return []
 
-        return image_gallery_list
+        try:
+            photo_list = [x.get_attribute('src') for x in photo_rows]
+        except Exception as es:
+            print(f'Ошибка при формирования ссылок на фото "{es}"')
+            return []
+
+        return photo_list
 
     def get_photo(self):
         rows_List = self._get_image_gallery_list()
@@ -302,13 +213,7 @@ class TovarParserOneTheard:
             rows_List = self.get_one_image()
             return rows_List
 
-        good_image_list = self.itter_get_image(rows_List)
-
-
-
-        return good_image_list
-
-
+        return rows_List
 
     def start_pars(self):
 
@@ -318,7 +223,8 @@ class TovarParserOneTheard:
 
         count_db_tovar = self.BotDB.get_all_count()
 
-        for id_pk_ in range(140, count_db_tovar):
+        # for id_pk_ in range(10):
+        for id_pk_ in range(265, 283):
         # for id_pk_ in range(count_db_tovar):
 
             sql_tovar = self.BotDB.get_tovar(id_pk_ + 1)
@@ -345,13 +251,11 @@ class TovarParserOneTheard:
 
             post['xarakt'] = self.get_xarakt_list()
 
-            post['text'] = self.get_text()
-
-            self.get_xarakt_list2(post['xarakt'])
-
             post['price'] = self.get_price()
 
             post['edinicha'] = self.get_edinicha()
+
+            post['full_name'] = self.get_name_full()
 
             image_list = self.get_photo()
 
@@ -362,11 +266,11 @@ class TovarParserOneTheard:
 
             post['image'] = image_list
 
+
             self.links_post.append(post)
 
             if id_pk_ % 5 == 0 and id_pk_ != 0:
                 print(f'Обработал {id_pk_} товаров')
-
 
             if id_pk_ % 30 == 0 and id_pk_ != 0:
                 file_name = f'tovar_{id_pk_} {datetime.now().strftime("%H_%M_%S")}'

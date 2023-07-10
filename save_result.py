@@ -21,7 +21,7 @@ class SaveResult:
                        'Комплект дополнительные', 'Фото', 'Категория', 'Производитель', 'Тип товара',
                        'Ссылка на сторонний сайт', 'Алгоритм', 'Ед.Измерения', 'ID', 'PARENT_ID', 'Видимость',
                        'Видимость варианта', 'Статус товара', 'Количество', 'Описание', 'Видео', 'Документы',
-                       'Гарантия', 'Артикул', 'Страна Бренда', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Тип',
+                       'Гарантия', 'Артикул', 'Страна Бренда', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
                        'Состав коллекции']
 
     @staticmethod
@@ -66,10 +66,11 @@ class SaveResult:
         ws.cell(row=count_def, column=1).value = ''
         ws.cell(row=count_def, column=2).value = ''
         try:
-            name = post['name']
+            full_name = post['full_name']
         except:
-            name = ''
-        ws.cell(row=count_def, column=3).value = name
+            full_name = ''
+
+        ws.cell(row=count_def, column=3).value = full_name
 
         try:
             price = int(post['price'])
@@ -99,7 +100,7 @@ class SaveResult:
 
         ws.cell(row=count_def, column=9).value = category
         try:
-            proiz = post['proizvoditel']
+            proiz = post['proiz']
         except:
             proiz = ''
         ws.cell(row=count_def, column=10).value = proiz
@@ -126,9 +127,21 @@ class SaveResult:
         ws.cell(row=count_def, column=23).value = ''
         ws.cell(row=count_def, column=24).value = ''
         ws.cell(row=count_def, column=25).value = ''
-        ws.cell(row=count_def, column=26).value = post['coutry']
-        ws.cell(row=count_def, column=27).value = ''
-        ws.cell(row=count_def, column=28).value = post['name']
+        try:
+            contry = post['coutry']
+        except:
+            contry = ''
+        ws.cell(row=count_def, column=26).value = contry
+        try:
+            proizvoditel = post['xarakt']['Производитель']
+        except:
+            proizvoditel = ''
+        ws.cell(row=count_def, column=27).value = proizvoditel
+        try:
+            name = post['name']
+        except:
+            name = ''
+        ws.cell(row=count_def, column=28).value = name
         try:
             color = ';'.join(x for x in post['color'])
         except:
@@ -141,12 +154,12 @@ class SaveResult:
 
         ws.cell(row=count_def, column=30).value = size
         try:
-            type_ = ';'.join(x for x in post['type'])
+            naznach = post['xarakt']['Помещение']
         except:
-            type_ = ''
-        ws.cell(row=count_def, column=31).value = type_
+            naznach = ''
+        ws.cell(row=count_def, column=31).value = naznach
         ws.cell(row=count_def, column=32).value = 'Дизайн'
-        # for count_com, comment in enumerate(post['xarakt']):
+
 
         count = 0
         start_count = 26
@@ -187,7 +200,7 @@ class SaveResult:
         global_count = 0
         start_count = 21
 
-        for col in range(len(self.colums_harakt) + 11):
+        for col in range(len(self.colums_harakt) + 12):
             ws.cell(row=1, column=start_count + global_count).value = random.randint(1111, 9999)
 
             global_count += 1

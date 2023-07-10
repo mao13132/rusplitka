@@ -130,6 +130,19 @@ class SourceParse:
 
         return coutry
 
+    def get_proiz(self, row):
+        try:
+            proiz = row.find_element(by=By.XPATH, value=f".//*[contains(@class, 'country')]").text
+        except:
+            return ''
+
+        try:
+            proiz = proiz.split('\n')[0]
+        except:
+            proiz = proiz
+
+        return proiz
+
     def get_size(self, row):
         try:
             size = row.find_elements(by=By.XPATH, value=f".//*[contains(@class, 'size')]/span")
@@ -163,6 +176,7 @@ class SourceParse:
             name = self.get_name(row)
             color = self.get_color(row)
             coutry = self.get_coutry(row)
+            proiz = self.get_proiz(row)
             size = self.get_size(row)
             price = self.get_price(row)
 
@@ -172,6 +186,7 @@ class SourceParse:
             good_itter['name'] = name
             good_itter['color'] = color
             good_itter['coutry'] = coutry
+            good_itter['proiz'] = proiz
             good_itter['size'] = size
             good_itter['price'] = price
 
@@ -180,7 +195,7 @@ class SourceParse:
             count_good = len(self.links_post)
 
             if count_good % 5 == 0 and count_good != 0:
-                print(f'Обработал {count_good} коллекций')
+                print(f'! Обработал {count_good} коллекций')
 
         print(f'Всего обработал {len(self.links_post)} коллекций')
 
@@ -225,5 +240,5 @@ class SourceParse:
             return False
 
         response_one_step = self.step_one_parse()
-
+        # TODO написать сохранение в json
         return self.links_post

@@ -20,7 +20,7 @@ class SaveResultTovar:
                        'Комплект дополнительные', 'Фото', 'Категория', 'Производитель', 'Тип товара',
                        'Ссылка на сторонний сайт', 'Алгоритм', 'Ед.Измерения', 'ID', 'PARENT_ID', 'Видимость',
                        'Видимость варианта', 'Статус товара', 'Количество', 'Описание', 'Видео', 'Документы',
-                       'Гарантия', 'Артикул', 'Страна Бренда', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Тип',
+                       'Гарантия', 'Артикул', 'Страна Бренда', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
                        'Состав коллекции']
 
         # print()
@@ -57,17 +57,14 @@ class SaveResultTovar:
 
         return self.colums_checker
 
-    # def insert_contry(self, dict_in):
-    #
-    #     for key, value in dict_in.items():
-    #         print(key)
+
 
     def write_data(self, ws, count_def, post):
 
         ws.cell(row=count_def, column=1).value = ''
         ws.cell(row=count_def, column=2).value = ''
         try:
-            name = post['name']
+            name = post['full_name']
         except:
             name = ''
         ws.cell(row=count_def, column=3).value = name
@@ -139,7 +136,7 @@ class SaveResultTovar:
         except:
             country = ''
         ws.cell(row=count_def, column=26).value = country
-        ws.cell(row=count_def, column=27).value = ''
+        ws.cell(row=count_def, column=27).value = proiz
         try:
             coll_name = post['collection']
         except:
@@ -152,13 +149,17 @@ class SaveResultTovar:
             size = ''
 
         ws.cell(row=count_def, column=30).value = size
-        try:
-            type_ = post['xarakt']['Тип']
-        except:
-            type_ = ''
-        ws.cell(row=count_def, column=31).value = type_
 
-        ws.cell(row=count_def, column=32).value = type_
+        try:
+            naznach = post['xarakt']['Помещение']
+        except:
+            naznach = ''
+        ws.cell(row=count_def, column=31).value = naznach
+        try:
+            sostav_collection = post['xarakt']['Назначение']
+        except:
+            sostav_collection = ''
+        ws.cell(row=count_def, column=32).value = sostav_collection
 
         count = 0
         start_count = 33

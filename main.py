@@ -11,12 +11,13 @@ from src.source_parse import SourceParse
 from time import perf_counter
 
 from sql.bot_connector import BotDB
-from src.tovar_parser import TovarParser
+from src.temp_plu_in_coll import coll_data
+from src.tovar_parser_one_theard import TovarParserOneTheard
 
 
 def main():
 
-    collec_count_page = 3
+    collec_count_page = 1
 
     browser_core = CreatBrowser('collection', True)
 
@@ -25,7 +26,7 @@ def main():
     print(f'Парсер запущен. Получаю данные')
 
     data_good = SourceParse(browser_core.driver, collec_count_page).start_pars()
-    from src.temp_source_collect import list_col
+    # from src.temp_source_collect import list_col
     # data_good = list_col[:2]
 
 
@@ -44,14 +45,12 @@ def main():
     print()
 
 def save_plu_tovar():
-    collec_count_page = 0
+    browser_core = CreatBrowser('collection', True)
 
-    # browser_core = CreatBrowser()
+    tavar_data = TovarParserOneTheard(browser_core.driver, BotDB).start_pars()
 
-    tavar_data = TovarParser(BotDB).start_pars()
-    # tavar_data = TovarParser(browser_core.driver, BotDB).start_pars()
-    # from src.temp_good_tovar import good_list
-    # tavar_data = good_list
+    # from src.temp_over_tovar import tovar_over
+    # tavar_data = tovar_over
 
     file_name = f'{datetime.now().strftime("%H_%M_%S")}'
 
@@ -73,11 +72,11 @@ if __name__ == '__main__':
 
 
 
-    # start_job = perf_counter()
-    # print(f'Начинаю парсинг товаров {datetime.now().strftime("%H_%M_%S")}')
-    # save_plu_tovar_one_theard()
-    # over_job = perf_counter() - start_job
-    # over_job = over_job / 60
-    # print(f'Закончил парсинг товаров {datetime.now().strftime("%H_%M_%S")} завтратив времени: {over_job} минут')
+    start_job = perf_counter()
+    print(f'Начинаю парсинг товаров {datetime.now().strftime("%H_%M_%S")}')
+    save_plu_tovar()
+    over_job = perf_counter() - start_job
+    over_job = over_job / 60
+    print(f'Закончил парсинг товаров {datetime.now().strftime("%H_%M_%S")} завтратив времени: {over_job} минут')
 
     print(f'Работу закончил')

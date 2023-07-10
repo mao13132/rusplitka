@@ -57,6 +57,9 @@ class CreatBrowser:
         #     prefs = {"profile.managed_default_content_settings.images": 2}
         #     options.add_experimental_option("prefs", prefs)
 
+        prefs = {"profile.managed_default_content_settings.images": 2}
+        options.add_experimental_option("prefs", prefs)
+
         tz_params = {'timezoneId': 'Asia/Almaty'}
 
         s = Service(executable_path=r"chromedriver.exe")
