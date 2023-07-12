@@ -1,6 +1,7 @@
 import os
 
 from browser.createbrowser_theard import CreatBrowser
+from save_coll_and_products import SaveCollAndProduct
 from save_result_tovar import SaveResultTovar
 
 from sql.bot_connector import BotDB
@@ -12,9 +13,12 @@ from datetime import datetime
 
 from src.tovar_parser_one_theard import TovarParserOneTheard
 
+from check_dir import check_dirs
+
 
 def start_parser(step1, step2, step3, step4):
     try:
+        check_dirs()
 
         collec_count_page = 0
 
@@ -40,7 +44,9 @@ def start_parser(step1, step2, step3, step4):
                 print(f'Ошибка, файл с брендами пуст не могу запустить шаг 2. Запустите шаг 1')
                 return False
 
-            for url in list_url_brands.split('\n'):
+            list_brands = [x for x in list_url_brands.split('\n') if x != '']
+
+            for url in list_brands:
                 name_collection = url.split('/')[-2]
 
                 print(f'Запускаю парсинг "{name_collection}"')
@@ -51,6 +57,7 @@ def start_parser(step1, step2, step3, step4):
                 print(f'Сохранил коллекцию {name_collection} в файл {file_name_json}')
 
         if step3:
+            print(f'Шаг3 запущен. Получаю данные')
             # from src.temp_source_collect import list_col
             # data_good = list_col[:10]
 
@@ -58,16 +65,22 @@ def start_parser(step1, step2, step3, step4):
             # dir_ = os.getcwd() + f'\\files\\collections\\'
             collection_list_files = [f'{x}' for x in os.listdir(dir_) if 'json' in x]
 
+            if collection_list_files == []:
+                print(f'Нет данных для парсинга по коллекциям. Запустите шаг2')
+                return False
+
             for file_collection in collection_list_files:
 
                 _file_collection = dir_ + file_collection
 
                 data_good = SaveResultTovar.load_collection(_file_collection)
 
+                proiz = data_good[0]['proiz']
+
                 print(f'Собрал {len(data_good)} коллекций на обработку')
 
                 collection_data = PluParser(browser_core.driver, data_good, BotDB).start_pars()
-                # collection_data = coll_data
+
 
                 print(f'Обработал {len(collection_data)} коллекций')
 
@@ -75,23 +88,22 @@ def start_parser(step1, step2, step3, step4):
 
                 file_name = f'{_file_name}_{datetime.now().strftime("%H_%M_%S")}'
 
-                SaveResult(collection_data).save_file(file_name)
+                file_name_json = SaveResultTovar.save_col_and_tovar(file_name, data_good)
 
-        if step4:
-            """step4_pars_product"""
+                # SaveResult(collection_data).save_file(file_name)
+                if step4:
 
-            browser_core = CreatBrowser('collection', True)
+                    tavar_data = TovarParserOneTheard(browser_core.driver, BotDB).start_pars(proiz)
 
-            tavar_data = TovarParserOneTheard(browser_core.driver, BotDB).start_pars()
+                    if not tavar_data:
+                        continue
 
-            # from src.temp_over_tovar import tovar_over
-            # tavar_data = tovar_over
+                    file_name = f'full_{proiz}_collections_and_products_{datetime.now().strftime("%H_%M_%S")}'
 
-            file_name = f'{datetime.now().strftime("%H_%M_%S")}'
+                    SaveCollAndProduct(collection_data, tavar_data).save_file(file_name)
+                    # SaveResultTovar(tavar_data).save_file(file_name)
 
-            SaveResultTovar(tavar_data).save_file(file_name)
 
-            return True
 
         print()
     except BaseException as es:

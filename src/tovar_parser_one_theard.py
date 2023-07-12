@@ -23,8 +23,10 @@ class TovarParserOneTheard:
 
             self.driver.get(url)
             return True
+        except TimeoutError:
+            return False
         except Exception as es:
-            print(f'Ошибка при заходе на "{url}" "{es}"')
+            # print(f'Ошибка при заходе на "{url}" "{es}"')
             return False
 
     def __check_load_page(self, name_post):
@@ -218,74 +220,123 @@ class TovarParserOneTheard:
 
         return rows_List
 
-    def start_pars(self):
+    def load_tovar_to_proizv(self, proiz):
+        # list_proizv = self.BotDB.get_all_proiz()
+        list_proizv = self.BotDB.get_one_proiz(proiz)
+
+        pars_list = []
+
+        for proizv in list_proizv:
+            plu = {}
+
+            try:
+                proizv = proizv[0]
+            except:
+                print(f'Производитель не распознан get_all_tovar_to_proiz')
+                return []
+
+            count_db_tovar = self.BotDB.get_all_tovar_to_proiz(proizv)
+
+            id_pk_list = [x[0] for x in count_db_tovar]
+
+            plu['proizv'] = proizv
+            plu['id_pk_list'] = id_pk_list
+
+            pars_list.append(plu)
+
+        return pars_list
+
+
+
+    def start_pars(self, proiz):
 
         self.links_post = []
 
         good_over_count = 0
 
-        count_db_tovar = self.BotDB.get_all_count()
+        tovar_to_brands = self.load_tovar_to_proizv(proiz)
+
+        if tovar_to_brands == []:
+            print(f'Список товаров пуст')
+            return False
+        for brands in tovar_to_brands:
+            brand_list = []
+            for id_pk_ in brands['id_pk_list']:
+
+        # count_db_tovar = self.BotDB.get_all_count()
 
         # for id_pk_ in range(10):
         # for id_pk_ in range(265, 283):
-        for id_pk_ in range(count_db_tovar):
+        # for id_pk_ in range(count_db_tovar):
 
-            sql_tovar = self.BotDB.get_tovar(id_pk_ + 1)
-            try:
-                id_pk, url, name, _, artikle, collection, prozvoditel, _ = sql_tovar
-            except:
-                continue
+                sql_tovar = self.BotDB.get_tovar(id_pk_)
+                # sql_tovar = self.BotDB.get_tovar(id_pk_ + 1)
+                try:
+                    id_pk, url, name, _, artikle, collection, prozvoditel, _ = sql_tovar
+                except:
+                    continue
 
-            if not sql_tovar:
-                continue
+                if not sql_tovar:
+                    continue
 
-            post = {}
-            post['name'] = name
-            post['id_pk'] = id_pk
-            post['link'] = url
-            post['artikle'] = artikle
-            post['collection'] = collection
-            post['prozvoditel'] = prozvoditel
+                post = {}
+                post['name'] = name
+                post['id_pk'] = id_pk
+                post['link'] = url
+                post['artikle'] = artikle
+                post['collection'] = collection
+                post['prozvoditel'] = prozvoditel
 
-            result_load_page = self.loop_load_page(post)
+                result_load_page = self.loop_load_page(post)
 
-            if not result_load_page:
-                continue
+                if not result_load_page:
+                    continue
 
-            post['xarakt'] = self.get_xarakt_list()
+                post['xarakt'] = self.get_xarakt_list()
 
-            post['price'] = self.get_price()
+                post['price'] = self.get_price()
 
-            post['edinicha'] = self.get_edinicha()
+                post['edinicha'] = self.get_edinicha()
 
-            post['full_name'] = self.get_name_full()
+                post['full_name'] = self.get_name_full()
 
-            image_list = self.get_photo()
+                image_list = self.get_photo()
 
-            try:
-                image_list = ' '.join(x for x in image_list)
-            except:
-                image_list = ''
+                try:
+                    image_list = ' '.join(x for x in image_list)
+                except:
+                    image_list = ''
 
-            post['image'] = image_list
+                post['image'] = image_list
 
+                self.links_post.append(post)
+                brand_list.append(post)
 
-            self.links_post.append(post)
+                if id_pk_ % 5 == 0 and id_pk_ != 0:
+                    print(f'Обработал {id_pk_} товаров')
 
-            if id_pk_ % 5 == 0 and id_pk_ != 0:
-                print(f'Обработал {id_pk_} товаров')
+                if id_pk_ % 30 == 0 and id_pk_ != 0:
+                    file_name = f'____temp_____{brands["proizv"]}-{id_pk_} {datetime.now().strftime("%H_%M_%S")}'
 
-            if id_pk_ % 30 == 0 and id_pk_ != 0:
-                file_name = f'tovar_{id_pk_} {datetime.now().strftime("%H_%M_%S")}'
+                    save_dict = {}
+                    save_dict['name_colums'] = self.all_xarakt
+                    save_dict['result'] = brand_list
+                    # save_dict['result'] = self.links_post
 
-                save_dict = {}
-                save_dict['name_colums'] = self.all_xarakt
-                save_dict['result'] = self.links_post
+                    SaveResultTovar(save_dict).save_file(file_name)
+                    print(f'Сохранил {id_pk_} PLU')
+                    # TODO убрать
+                    # return save_dict
 
-                SaveResultTovar(save_dict).save_file(file_name)
-                print(f'Сохранил {id_pk_} PLU')
+            print(f'Итог: собрал информацию с {len(self.links_post)} товаров')
 
-            # print()
+            full_brand = {}
+            full_brand['name_colums'] = self.all_xarakt
+            full_brand['result'] = brand_list
+            file_name = f'_____temp_____{brands["proizv"]} {datetime.now().strftime("%H_%M_%S")}'
+            SaveResultTovar(full_brand).save_file(file_name)
+
+                # print()
 
         print(f'Итог: собрал информацию с {len(self.links_post)} товаров')
 

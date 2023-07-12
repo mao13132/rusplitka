@@ -168,13 +168,6 @@ class SaveResult:
         count = 0
         start_count = 26
 
-        # for key, value in post['xarakt'].items():
-        #     # for key, value in self.colums_checker.items():
-        #     ws.cell(row=count_def, column=self.colums_checker[key]).value = value
-        #     # ws.cell(row=count_def + count, column=start_count).value = comment['author_comment']
-        #
-        #     count += 1
-        #     start_count += 1
 
         return True
 
@@ -231,7 +224,7 @@ class SaveResult:
 
         filename = f'{filename}'
 
-        save_file_name = os.getcwd() + r'/files/result/collections_' + filename + '.xlsx'
+        save_file_name = os.getcwd() + r'/files/result/collections/collections_' + filename + '.xlsx'
 
         wb.save(save_file_name)
 

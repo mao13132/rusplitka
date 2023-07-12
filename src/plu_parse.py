@@ -27,7 +27,7 @@ class PluParser:
         except TimeoutException:
             return False
         except Exception as es:
-            print(f'Ошибка при заходе на "{url}" "{es}"')
+            # print(f'Ошибка при заходе на "{url}" "{es}"')
             return False
 
     def __check_load_page(self, name_post):
@@ -351,7 +351,6 @@ class PluParser:
             if post['link'] == '':
                 continue
 
-            print(f'Начинаю обработку {post["name"]} коллекции')
 
             result_load_page = self.loop_load_page(post)
 
@@ -373,10 +372,12 @@ class PluParser:
             ################сбор товара из коллекции############
             post['plu_data'] = GetPluInColl(self.driver, post['name'], self.BotDB).start_plu_parse()
 
-            print(f'Собрал в коллекции {post["name"]} {len(post["plu_data"])}шт товаров')
+            # print(f'Собрал в коллекции {post["name"]} {len(post["plu_data"])}шт товаров')
 
             if count % 5 == 0 and count != 0:
-                print(f'Обработал {count} колллекций')
+                print(f'! Обработал {count} колллекций')
+                # TODO убрать
+                # return self.links_post
 
             good_over_count += 1
 

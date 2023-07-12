@@ -8,10 +8,12 @@ from openpyxl.styles import Font
 from datetime import datetime
 
 
-class SaveResultTovar:
-    def __init__(self, good_dict):
+class SaveCollAndProduct:
+    def __init__(self, collect_dict, good_dict):
 
         self.colums_checker = {}
+
+        self.collect_dict = collect_dict
 
         self.good_dict = good_dict['result']
 
@@ -37,6 +39,117 @@ class SaveResultTovar:
             return False
 
         return filename
+
+
+    def write_collections(self, ws, count_def, post):
+
+        ws.cell(row=count_def, column=1).value = ''
+        ws.cell(row=count_def, column=2).value = ''
+        try:
+            full_name = post['full_name']
+        except:
+            full_name = ''
+
+        try:
+            name = post['name']
+        except:
+            name = ''
+
+        ws.cell(row=count_def, column=3).value = name
+        # ws.cell(row=count_def, column=3).value = full_name
+
+        try:
+            price = int(post['price'])
+        except:
+            try:
+                price = post['price']
+            except:
+                price = ''
+
+        ws.cell(row=count_def, column=4).value = price
+        ws.cell(row=count_def, column=5).value = ''
+        ws.cell(row=count_def, column=6).value = ''
+        ws.cell(row=count_def, column=7).value = ''
+
+        try:
+            image = ' '.join(x for x in post['image'])
+        except:
+            image = ''
+
+        ws.cell(row=count_def, column=8).value = image
+
+        try:
+            category = 'Плитка, керамогранит, мозаика'
+        except:
+            category = ''
+
+
+        ws.cell(row=count_def, column=9).value = category
+        try:
+            proiz = post['proiz']
+        except:
+            proiz = ''
+        ws.cell(row=count_def, column=10).value = proiz
+        ws.cell(row=count_def, column=11).value = ''
+        try:
+            link = post['link']
+        except:
+            link = ''
+        ws.cell(row=count_def, column=12).value = link
+        ws.cell(row=count_def, column=13).value = ''
+        ws.cell(row=count_def, column=14).value = 'м2'
+        ws.cell(row=count_def, column=15).value = ''
+        ws.cell(row=count_def, column=16).value = ''
+        ws.cell(row=count_def, column=17).value = 1
+        ws.cell(row=count_def, column=18).value = 1
+        ws.cell(row=count_def, column=19).value = ''
+        ws.cell(row=count_def, column=20).value = 9999
+        try:
+            opis = post['opisanie']
+        except:
+            opis = ''
+        ws.cell(row=count_def, column=21).value = opis
+        ws.cell(row=count_def, column=22).value = ''
+        ws.cell(row=count_def, column=23).value = ''
+        ws.cell(row=count_def, column=24).value = ''
+        ws.cell(row=count_def, column=25).value = ''
+        try:
+            contry = post['xarakt']['Страна']
+        except:
+            contry = ''
+        ws.cell(row=count_def, column=26).value = contry
+        try:
+            proizvoditel = post['xarakt']['Производитель']
+        except:
+            proizvoditel = ''
+        ws.cell(row=count_def, column=27).value = proizvoditel
+
+        ws.cell(row=count_def, column=28).value = name
+        try:
+            color = ';'.join(x for x in post['color'])
+        except:
+            color = ''
+        ws.cell(row=count_def, column=29).value = color
+        try:
+            size = post['xarakt']['Размер']
+        except:
+            size = ''
+
+        ws.cell(row=count_def, column=30).value = size
+        try:
+            naznach = post['xarakt']['Помещение']
+        except:
+            naznach = ''
+        ws.cell(row=count_def, column=31).value = naznach
+        ws.cell(row=count_def, column=32).value = 'Дизайн'
+
+
+        count = 0
+        start_count = 26
+
+
+        return True
+
 
     def create_title(self, ws):
 
@@ -178,9 +291,26 @@ class SaveResultTovar:
 
     def itter_rows(self, ws):
         count_def = 3
+
+
+        for count_post, post in enumerate(self.collect_dict):
+            if post['link'] == '':
+                continue
+
+            try:
+                write_coll = self.write_collections(ws, count_def, post)
+            except Exception as es:
+                print(f'SaveResult: ошибка write_coll {es}')
+
+            count_def += 1
+
+
+
+
         for count_post, post in enumerate(self.good_dict):
             if post['link'] == '':
                 continue
+
             try:
                 write_data = self.write_data(ws, count_def, post)
             except Exception as es:
@@ -211,6 +341,7 @@ class SaveResultTovar:
         response_itter = self.itter_rows(ws)
 
         return True
+
 
     def save_file(self, filename):
 

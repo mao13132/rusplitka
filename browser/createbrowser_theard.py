@@ -48,7 +48,7 @@ class CreatBrowser:
         options.add_argument("--disable-gpu")
 
         # options.add_argument("--proxy-server=127.0.0.1:8080")
-        # options.add_argument("--headless")  # скрываем браузер
+        options.add_argument("--headless")  # скрываем браузер
 
 
         prefs = {"profile.managed_default_content_settings.images": 2}

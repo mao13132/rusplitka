@@ -9,8 +9,6 @@ class BotDB:
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
-
-
             cls.__instance = super().__new__(cls)
 
         return cls.__instance
@@ -91,11 +89,7 @@ class BotDB:
             except Exception as es:
                 print(f'Ошибка SQL update_double 2: {es}')
 
-
         return True
-
-
-
 
     def get_all_count(self):
         try:
@@ -113,6 +107,40 @@ class BotDB:
 
         return res
 
+    def get_all_proiz(self):
+        try:
+            result = self.cursor.execute("SELECT DISTINCT proiz FROM plu")
+            response = result.fetchall()
+        except Exception as es:
+            print(f'SQL ошибка! Не смог добавить get_all_count в DB "{es}"')
+
+            return []
+
+        return response
+
+    def get_one_proiz(self, proiz):
+        try:
+            result = self.cursor.execute(f"SELECT DISTINCT proiz FROM plu WHERE proiz = '{proiz}'")
+            response = result.fetchall()
+        except Exception as es:
+            print(f'SQL ошибка! Не смог добавить get_one_proiz в DB "{es}"')
+
+            return []
+
+        return response
+
+    def get_all_tovar_to_proiz(self, proizv):
+
+
+        try:
+            result = self.cursor.execute(f"SELECT * FROM plu WHERE proiz = '{proizv}'")
+            response = result.fetchall()
+        except Exception as es:
+            print(f'SQL ошибка! Не смог добавить get_all_tovar_to_proiz в DB "{es}"')
+
+            return []
+
+        return response
 
     def get_tovar(self, id_pk):
         try:
@@ -129,9 +157,6 @@ class BotDB:
             return []
 
         return res
-
-
-
 
     def close(self):
         # Закрытие соединения

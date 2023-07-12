@@ -191,12 +191,7 @@ class SourceParse:
         return price
 
     def itter_rows_post(self, rows_post):
-        count = 0
         for row in rows_post:
-            count += 1
-            #
-            # if count > 2:
-            #     return True
 
             link = self.get_link(row)
             name = self.get_name(row)
@@ -221,9 +216,9 @@ class SourceParse:
             count_good = len(self.links_post)
 
             if count_good % 5 == 0 and count_good != 0:
-                print(f'! Обработал {count_good} коллекций')
+                print(f'! Собрал {count_good} коллекций')
 
-        print(f'Всего обработал {len(self.links_post)} коллекций')
+        print(f'Всего собрал {len(self.links_post)} коллекций')
 
         return True
 
