@@ -1,4 +1,5 @@
 import json
+import os
 import random
 
 from openpyxl import Workbook
@@ -21,7 +22,7 @@ class SaveResult:
                        'Комплект дополнительные', 'Фото', 'Категория', 'Производитель', 'Тип товара',
                        'Ссылка на сторонний сайт', 'Алгоритм', 'Ед.Измерения', 'ID', 'PARENT_ID', 'Видимость',
                        'Видимость варианта', 'Статус товара', 'Количество', 'Описание', 'Видео', 'Документы',
-                       'Гарантия', 'Артикул', 'Страна Бренда', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
+                       'Гарантия', 'Артикул', 'Страна', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
                        'Состав коллекции']
 
     @staticmethod
@@ -70,7 +71,13 @@ class SaveResult:
         except:
             full_name = ''
 
-        ws.cell(row=count_def, column=3).value = full_name
+        try:
+            name = post['name']
+        except:
+            name = ''
+
+        ws.cell(row=count_def, column=3).value = name
+        # ws.cell(row=count_def, column=3).value = full_name
 
         try:
             price = int(post['price'])
@@ -128,7 +135,7 @@ class SaveResult:
         ws.cell(row=count_def, column=24).value = ''
         ws.cell(row=count_def, column=25).value = ''
         try:
-            contry = post['coutry']
+            contry = post['xarakt']['Страна']
         except:
             contry = ''
         ws.cell(row=count_def, column=26).value = contry
@@ -137,10 +144,7 @@ class SaveResult:
         except:
             proizvoditel = ''
         ws.cell(row=count_def, column=27).value = proizvoditel
-        try:
-            name = post['name']
-        except:
-            name = ''
+
         ws.cell(row=count_def, column=28).value = name
         try:
             color = ';'.join(x for x in post['color'])
@@ -148,7 +152,7 @@ class SaveResult:
             color = ''
         ws.cell(row=count_def, column=29).value = color
         try:
-            size = ';'.join(x for x in post['size'])
+            size = post['xarakt']['Размер']
         except:
             size = ''
 
@@ -227,7 +231,9 @@ class SaveResult:
 
         filename = f'{filename}'
 
-        wb.save(f'collections_{filename}.xlsx')
+        save_file_name = os.getcwd() + r'/files/result/collections_' + filename + '.xlsx'
+
+        wb.save(save_file_name)
 
         # self.save_to_json(filename, self.good_dict)
 

@@ -1,0 +1,37 @@
+[
+    {
+        "link": "https://www.rusplitka.ru/products/abk/interno-9-15725/",
+        "name": "Interno 9",
+        "color": [
+            "коричневый",
+            "бежевый",
+            "серый",
+            "слоновая кость",
+            "чёрный"
+        ],
+        "coutry": "Италия",
+        "proiz": "ABK",
+        "size": [
+            "60x60",
+            "60x30",
+            "163.5x323",
+            "120x60"
+        ],
+        "price": "6156"
+    },
+    {
+        "link": "https://www.rusplitka.ru/products/abk/nest-15729/",
+        "name": "Nest",
+        "color": [
+            "коричневый",
+            "бежевый",
+            "серый"
+        ],
+        "coutry": "Италия",
+        "proiz": "ABK",
+        "size": [
+            "20x120"
+        ],
+        "price": "6630"
+    }
+]

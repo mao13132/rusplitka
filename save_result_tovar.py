@@ -20,7 +20,7 @@ class SaveResultTovar:
                        'Комплект дополнительные', 'Фото', 'Категория', 'Производитель', 'Тип товара',
                        'Ссылка на сторонний сайт', 'Алгоритм', 'Ед.Измерения', 'ID', 'PARENT_ID', 'Видимость',
                        'Видимость варианта', 'Статус товара', 'Количество', 'Описание', 'Видео', 'Документы',
-                       'Гарантия', 'Артикул', 'Страна Бренда', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
+                       'Гарантия', 'Артикул', 'Страна', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
                        'Состав коллекции']
 
         # print()
@@ -56,8 +56,6 @@ class SaveResultTovar:
             global_count += 1
 
         return self.colums_checker
-
-
 
     def write_data(self, ws, count_def, post):
 
@@ -231,3 +229,54 @@ class SaveResultTovar:
         print(f'Сохранил \n{filename}.xlsx')
 
         return filename
+
+    @staticmethod
+    def save_brands(links_brands):
+        with open('brands.txt', 'w', encoding='utf-8') as file:
+            file.write(links_brands)
+            return True
+
+    @staticmethod
+    def check_brands():
+        import os
+
+        if os.path.exists('brands.txt'):
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def load_file():
+        try:
+            with open('brands.txt', 'r', encoding='utf-8') as file:
+                files_out = file.read()
+                return files_out
+
+        except:
+            return False
+
+    @staticmethod
+    def save_collection(file_name, data_dict):
+        import json
+
+        file_name = r'files/collections/' + file_name + '.json'
+
+        try:
+            with open(file_name, 'w', encoding='utf-8') as file:
+                json.dump(data_dict, file, indent=4, ensure_ascii=False)
+
+                return file_name
+        except:
+            return False
+
+    @staticmethod
+    def load_collection(file_name):
+        import json
+
+        try:
+            with open(file_name, 'r', encoding='utf-8') as file:
+                good_dict = json.load(file)
+
+                return good_dict
+        except:
+            return False

@@ -37,7 +37,7 @@ class TovarParserOneTheard:
                 EC.presence_of_element_located((By.XPATH, f'//*[contains(text(), "тзывы")]')))
             return True
         except Exception as es:
-            print(f'Ошибка при загрузке "{name_post}" поста "{es}"')
+            # print(f'Ошибка при загрузке "{name_post}" поста "{es}"')
             return False
 
     def loop_load_page(self, post):
@@ -157,6 +157,9 @@ class TovarParserOneTheard:
 
             return 'м2'
 
+        if 'комплект' in edinic:
+            edinic = 'кмп'
+
         return edinic
 
     def _get_image_in_row(self, row):
@@ -224,8 +227,8 @@ class TovarParserOneTheard:
         count_db_tovar = self.BotDB.get_all_count()
 
         # for id_pk_ in range(10):
-        for id_pk_ in range(265, 283):
-        # for id_pk_ in range(count_db_tovar):
+        # for id_pk_ in range(265, 283):
+        for id_pk_ in range(count_db_tovar):
 
             sql_tovar = self.BotDB.get_tovar(id_pk_ + 1)
             try:

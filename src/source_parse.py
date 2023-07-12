@@ -6,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from datetime import datetime
 
+from save_result_tovar import SaveResultTovar
+
 
 class SourceParse:
     def __init__(self, driver, count_page):
@@ -30,7 +32,7 @@ class SourceParse:
         except:
             return False
 
-    def loop_load_page(self):
+    def loop_load_page(self, url):
         count = 0
         count_ower = 5
 
@@ -42,7 +44,7 @@ class SourceParse:
                 print(f'Не смог открыть {self.source_name}')
                 return False
 
-            start_page = self.load_page(self.url)
+            start_page = self.load_page(url)
 
             if not start_page:
                 continue
@@ -58,18 +60,37 @@ class SourceParse:
             return True
 
     def get_all_post(self):
-        try:
-            rows_post = self.driver.find_elements(by=By.XPATH,
-                                                  value=f"//*[@id='container_elements_catalog']"
-                                                        f"//*[@itemscope='product']")
+        count = 0
+        while True:
+            count += 1
+            if count > 5:
+                print(f'Не сомг включить коллекцию')
+                return False
+
+
+            try:
+                rows_post = self.driver.find_elements(by=By.XPATH,
+                                                      value=f"//*[@id='container_elements_catalog']"
+                                                            f"//*[@itemscope='product']")
 
 
 
-        except Exception as es:
-            print(f'Ошибка при получение постов"{es}"')
-            return False
+            except Exception as es:
+                print(f'Ошибка при получение постов"{es}"')
+                continue
 
-        return rows_post
+            if rows_post == []:
+                try:
+                    self.driver.find_element(by=By.XPATH,
+                                             value=f"//*[contains(@class, 'catalog_type')]//*[contains(text(), 'оллекции')]").click()
+                    continue
+                except:
+                    continue
+
+
+            return rows_post
+
+
 
     def click_paginator(self):
         try:
@@ -170,8 +191,13 @@ class SourceParse:
         return price
 
     def itter_rows_post(self, rows_post):
-
+        count = 0
         for row in rows_post:
+            count += 1
+            #
+            # if count > 2:
+            #     return True
+
             link = self.get_link(row)
             name = self.get_name(row)
             color = self.get_color(row)
@@ -230,11 +256,9 @@ class SourceParse:
 
             # return True
 
-    def start_pars(self):
+    def start_pars(self, url):
 
-        self.url = 'https://www.rusplitka.ru/catalog/'
-
-        result_start_page = self.loop_load_page()
+        result_start_page = self.loop_load_page(url)
 
         if not result_start_page:
             return False

@@ -19,7 +19,7 @@ class CreatBrowser:
 
         # options.add_argument(f"start-maximized")  # на весь экран
 
-        options.add_argument("--start-maximized")
+        # options.add_argument("--start-maximized")
         options.add_argument(f'window-size={self.display_x},{self.display_y}')
 
         # options.add_argument(f"set_window_size={self.display_x},{self.display_y}")  # Устанавливаем расширение экрана
@@ -48,14 +48,8 @@ class CreatBrowser:
         options.add_argument("--disable-gpu")
 
         # options.add_argument("--proxy-server=127.0.0.1:8080")
+        # options.add_argument("--headless")  # скрываем браузер
 
-        if not header:
-            options.add_argument("--headless")  # скрываем браузер
-            options.add_argument("- disable-gpu")  # скрываем браузер
-
-        # if not pikture:
-        #     prefs = {"profile.managed_default_content_settings.images": 2}
-        #     options.add_experimental_option("prefs", prefs)
 
         prefs = {"profile.managed_default_content_settings.images": 2}
         options.add_experimental_option("prefs", prefs)
