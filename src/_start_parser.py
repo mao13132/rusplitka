@@ -69,6 +69,11 @@ def start_parser(step1, step2, step3, step4):
                 print(f'Нет данных для парсинга по коллекциям. Запустите шаг2')
                 return False
 
+            full_tavar_data = {}
+            full_tavar_data['name_colums'] = []
+            full_tavar_data['result'] = []
+            collection_data_full = []
+
             for file_collection in collection_list_files:
 
                 _file_collection = dir_ + file_collection
@@ -81,6 +86,7 @@ def start_parser(step1, step2, step3, step4):
 
                 collection_data = PluParser(browser_core.driver, data_good, BotDB).start_pars()
 
+                collection_data_full.extend(collection_data)
 
                 print(f'Обработал {len(collection_data)} коллекций')
 
@@ -100,10 +106,16 @@ def start_parser(step1, step2, step3, step4):
 
                     file_name = f'full_{proiz}_collections_and_products_{datetime.now().strftime("%H_%M_%S")}'
 
+                    try:
+                        full_tavar_data['name_colums'].extend(tavar_data['name_colums'])
+                        full_tavar_data['result'].extend(tavar_data['result'])
+                    except:
+                        pass
+
                     SaveCollAndProduct(collection_data, tavar_data).save_file(file_name)
                     # SaveResultTovar(tavar_data).save_file(file_name)
-
-
+            file_name = f'all_{proiz}_collections_and_products_{datetime.now().strftime("%H_%M_%S")}'
+            SaveCollAndProduct(collection_data_full, full_tavar_data).save_file(file_name)
 
         print()
     except BaseException as es:

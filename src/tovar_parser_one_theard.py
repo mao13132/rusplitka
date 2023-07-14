@@ -89,7 +89,9 @@ class TovarParserOneTheard:
             name_har = har_row[0]
 
             val_black_list = ['Производитель', 'Коллекция', 'Артикул', 'Размер', 'Страна', 'Тип', 'Помещение',
-                              'Назначение']
+                              'Назначение', 'Цвет', 'Рисунок', 'Поверхность', 'Ректификат', 'Форма', 'Ширина, см',
+                              'Длина, см', 'Толщина, мм', 'Количество в коробке, м2', 'Количество в коробке, шт.',
+                              'Вес коробки, кг']
 
             if name_har not in self.all_xarakt and name_har not in val_black_list:
                 self.all_xarakt.append(name_har)

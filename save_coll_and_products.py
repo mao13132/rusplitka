@@ -24,9 +24,8 @@ class SaveCollAndProduct:
                        'Ссылка на сторонний сайт', 'Алгоритм', 'Ед.Измерения', 'ID', 'PARENT_ID', 'Видимость',
                        'Видимость варианта', 'Статус товара', 'Количество', 'Описание', 'Видео', 'Документы',
                        'Гарантия', 'Артикул', 'Страна', 'Производитель', 'Коллекция', 'Цвет', 'Размер', 'Назначение',
-                       'Состав коллекции']
-
-        # print()
+                       'Состав коллекции', 'Рисунок', 'Поверхность', 'Ректификат', 'Форма', 'Ширина, см', 'Длина, см',
+                       'Толщина, мм', 'Количество в коробке, м2', 'Количество в коробке, шт.', 'Вес коробки, кг']
 
     @staticmethod
     def save_to_json(filename, good_data):
@@ -39,7 +38,6 @@ class SaveCollAndProduct:
             return False
 
         return filename
-
 
     def write_collections(self, ws, count_def, post):
 
@@ -82,7 +80,6 @@ class SaveCollAndProduct:
             category = 'Плитка, керамогранит, мозаика'
         except:
             category = ''
-
 
         ws.cell(row=count_def, column=9).value = category
         try:
@@ -143,13 +140,10 @@ class SaveCollAndProduct:
         ws.cell(row=count_def, column=31).value = naznach
         ws.cell(row=count_def, column=32).value = 'Дизайн'
 
-
         count = 0
         start_count = 26
 
-
         return True
-
 
     def create_title(self, ws):
 
@@ -254,7 +248,12 @@ class SaveCollAndProduct:
         except:
             coll_name = ''
         ws.cell(row=count_def, column=28).value = coll_name
-        ws.cell(row=count_def, column=29).value = ''
+
+        try:
+            color = post['xarakt']['Цвет']
+        except:
+            color = ''
+        ws.cell(row=count_def, column=29).value = color
         try:
             size = post['xarakt']['Размер']
         except:
@@ -272,6 +271,57 @@ class SaveCollAndProduct:
         except:
             sostav_collection = ''
         ws.cell(row=count_def, column=32).value = sostav_collection
+
+        try:
+            picture = post['xarakt']['Рисунок']
+        except:
+            picture = ''
+        ws.cell(row=count_def, column=33).value = picture
+        try:
+            poverhnost = post['xarakt']['Поверхность']
+        except:
+            poverhnost = ''
+        ws.cell(row=count_def, column=34).value = poverhnost
+        try:
+            rect = post['xarakt']['Ректификат']
+        except:
+            rect = ''
+        ws.cell(row=count_def, column=35).value = rect
+        try:
+            form = post['xarakt']['Форма']
+        except:
+            form = ''
+        ws.cell(row=count_def, column=36).value = form
+        try:
+            width = post['xarakt']['Ширина, см']
+        except:
+            width = ''
+        ws.cell(row=count_def, column=37).value = width
+        try:
+            length = post['xarakt']['Длина, см']
+        except:
+            length = ''
+        ws.cell(row=count_def, column=38).value = length
+        try:
+            thickness = post['xarakt']['Толщина, мм']
+        except:
+            thickness = ''
+        ws.cell(row=count_def, column=39).value = thickness
+        try:
+            count_m2 = post['xarakt']['Количество в коробке, м2']
+        except:
+            count_m2 = ''
+        ws.cell(row=count_def, column=40).value = count_m2
+        try:
+            count_sh = post['xarakt']['Количество в коробке, шт.']
+        except:
+            count_sh = ''
+        ws.cell(row=count_def, column=41).value = count_sh
+        try:
+            weight = post['xarakt']['Вес коробки, кг']
+        except:
+            weight = ''
+        ws.cell(row=count_def, column=42).value = weight
 
         count = 0
         start_count = 33
@@ -292,7 +342,6 @@ class SaveCollAndProduct:
     def itter_rows(self, ws):
         count_def = 3
 
-
         for count_post, post in enumerate(self.collect_dict):
             if post['link'] == '':
                 continue
@@ -303,9 +352,6 @@ class SaveCollAndProduct:
                 print(f'SaveResult: ошибка write_coll {es}')
 
             count_def += 1
-
-
-
 
         for count_post, post in enumerate(self.good_dict):
             if post['link'] == '':
@@ -323,10 +369,14 @@ class SaveCollAndProduct:
     def create_number_uncolums(self, ws):
 
         global_count = 0
-        start_count = 33
+        start_count = 24
 
-        for col in range(len(self.colums_harakt) + 5):
-            ws.cell(row=1, column=start_count + global_count).value = random.randint(1111, 9999)
+        id_category = [186, 184, 9, 15, 10, 1, 45, 14, 17, 22, 96, 205, 56, 582, 571, 209, 27, 26, 590]
+
+        for col in range(len(id_category)):
+        # for col in range(len(self.colums_harakt) + 9):
+            ws.cell(row=1, column=start_count + global_count).value = id_category[col]
+            # ws.cell(row=1, column=start_count + global_count).value = random.randint(1111, 9999)
 
             global_count += 1
 
@@ -341,7 +391,6 @@ class SaveCollAndProduct:
         response_itter = self.itter_rows(ws)
 
         return True
-
 
     def save_file(self, filename):
 
